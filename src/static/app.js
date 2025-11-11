@@ -18,23 +18,22 @@ document.addEventListener("DOMContentLoaded", () => {
         const activityCard = document.createElement("div");
         activityCard.className = "activity-card";
 
-        const spotsLeft =
-          details.max_participants - details.participants.length;
+        const spotsLeft = details.max_participants - details.participants.length;
 
         // Create participants HTML with delete icons instead of bullet points
         const participantsHTML =
           details.participants.length > 0
             ? `<div class="participants-section">
-              <h5>Participants:</h5>
-              <ul class="participants-list">
-                ${details.participants
-                  .map(
-                    (email) =>
-                      `<li><span class="participant-email">${email}</span><button class="delete-btn" data-activity="${name}" data-email="${email}">❌</button></li>`
-                  )
-                  .join("")}
-              </ul>
-            </div>`
+                <h5>Participants:</h5>
+                <ul class="participants-list">
+                  ${details.participants
+                    .map(
+                      (email) =>
+                        `<li><span class="participant-email">${email}</span><button class="delete-btn" data-activity="${name}" data-email="${email}">❌</button></li>`
+                    )
+                    .join("")}
+                </ul>
+              </div>`
             : `<p><em>No participants yet</em></p>`;
 
         activityCard.innerHTML = `
@@ -42,12 +41,52 @@ document.addEventListener("DOMContentLoaded", () => {
           <p>${details.description}</p>
           <p><strong>Schedule:</strong> ${details.schedule}</p>
           <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
+          <button class="register-btn" data-activity="${name}">Register Student</button>
           <div class="participants-container">
             ${participantsHTML}
           </div>
         `;
 
         activitiesList.appendChild(activityCard);
+      });
+
+      // Add event listeners to register buttons
+      document.querySelectorAll(".register-btn").forEach((button) => {
+        button.addEventListener("click", handleRegister);
+      });
+  // Handle register functionality
+  async function handleRegister(event) {
+    const activity = event.target.getAttribute("data-activity");
+    const email = prompt("Enter student email to register:");
+    if (!email) return;
+    try {
+      const response = await fetch(
+        `/activities/${encodeURIComponent(activity)}/signup?email=${encodeURIComponent(email)}`,
+        {
+          method: "POST",
+        }
+      );
+      const result = await response.json();
+      if (response.ok) {
+        messageDiv.textContent = result.message;
+        messageDiv.className = "success";
+        // Refresh activities list to show updated participants
+        fetchActivities();
+      } else {
+        messageDiv.textContent = result.detail || "An error occurred";
+        messageDiv.className = "error";
+      }
+      messageDiv.classList.remove("hidden");
+      setTimeout(() => {
+        messageDiv.classList.add("hidden");
+      }, 5000);
+    } catch (error) {
+      messageDiv.textContent = "Failed to register. Please try again.";
+      messageDiv.className = "error";
+      messageDiv.classList.remove("hidden");
+      console.error("Error registering:", error);
+    }
+  }
 
         // Add option to select dropdown
         const option = document.createElement("option");
