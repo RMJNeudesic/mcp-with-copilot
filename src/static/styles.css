@@ -28,16 +28,24 @@ header h1 {
   margin-bottom: 10px;
 }
 
+
 main {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: center;
   gap: 30px;
-  justify-content: center;
 }
 
 @media (min-width: 768px) {
   main {
-    grid-template-columns: 2fr 1fr;
+    flex-direction: column;
+    align-items: center;
+  }
+  #activities-container {
+    order: 2;
+  }
+  #signup-container {
+    order: 1;
   }
 }
 
